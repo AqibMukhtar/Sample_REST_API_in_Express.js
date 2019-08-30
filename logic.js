@@ -64,12 +64,12 @@ function appendMember(categories, category, keyValues, id) {
         for (let key in keyValues) newMember[key] = keyValues[key];
         categories[categoryIndex].content.push(newMember);
         return {
-            creationStatus : true,
+            creationStatus: true,
             createdResource: newMember
         }
     }
     else return {
-        creationStatus : false,
+        creationStatus: false,
         createdResource: undefined
     }
 }
@@ -80,10 +80,47 @@ function parseResource(originalResource) {
     return JSON.stringify(arr);
 }
 
+function resquestBodyProperlyConstructed(reqBody, categories, categoryIndex) {
+    const incommingKeys = Object.keys(reqBody);
+    let existingKeys = Object.keys(categories[categoryIndex].content[0]);
+    if (JSON.stringify(incommingKeys) === JSON.stringify(existingKeys)) {
+        return {
+            matchingStatus: true
+        }
+    }
+    else
+        return {
+            matchingStatus: false
+        }
+}
+
+function updateResource(reqResource, categories, categoryIndex, contentIndex) {
+    const newId = reqResource.id;
+    if (idConflict(newId, categories[categoryIndex].content[contentIndex].id, categories[categoryIndex].content))
+        return {
+            updateStatus: false,
+            message: `ID ${newId} already exists`
+        }
+    categories[categoryIndex].content[contentIndex] = reqResource;
+    return {
+        updateStatus: true,
+        message: categories[categoryIndex].content[contentIndex]
+    }
+}
+
+function idConflict(newId, oldId, contentArray) {
+    if (newId === oldId) return false;
+    for (let x of contentArray)
+        if (newId === x.id) return true;
+    return false;
+}
+
 module.exports = {
     checkCategory,
     checkId,
     appendResource,
+    parseResource,
     appendMember,
-    parseResource
+    resquestBodyProperlyConstructed,
+    updateResource
 };

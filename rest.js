@@ -5,9 +5,9 @@ const Express = require('express');
 const app = Express();
 
 // Existing resources
-    // categories[anyIndex].content[0] defines meta data
+// categories[anyIndex].content[0] defines meta data
 let students = [
-    { id: undefined, name: undefined, projectNO: undefined},     
+    { id: undefined, name: undefined, projectNO: undefined },
     { id: 'S1', name: 'Aqib Mukhtar', projectNO: '32' },
     { id: 'S2', name: 'Abdul Rehman', projectNO: '49' },
     { id: 'S3', name: 'Muhammad Uzair', projectNO: '53' }
@@ -39,7 +39,7 @@ app.get('/api/:category', (req, res) => {
     const authentic = Logic.checkCategory(req.params.category, categories);
     if (authentic.status)
         res.status(200).send(Logic.parseResource(categories[authentic.index].content));
-    else 
+    else
         res.status(404).send(JSON.stringify({ message: 'Resource not found' }));
 });
 
@@ -51,7 +51,7 @@ app.get('/api/:category/:id', (req, res) => {
         res.status(404).send(JSON.stringify({ message: 'Resource not found' }));
 });
 
-// POST request handlers to create resdources
+// POST request handlers to create resources
 
 app.post('/api/:category', (req, res) => {
     const keyValues = req.body;
@@ -88,6 +88,29 @@ app.post('/api/:category/:id', (req, res) => {
     }
     else
         res.status(200).send(JSON.stringify({ message: 'Resource already exist' }));
+});
+
+// PUT request handlers to update resources
+
+app.put('/api/:category/:id', (req, res) => {
+    const id = req.params.id, category = req.params.category
+        , authentic = Logic.checkId(id, category, categories);
+    res.set({
+        'Cache-Control': 'no-cache'
+    });
+    if (authentic.status) {
+        if (Logic.resquestBodyProperlyConstructed(req.body, categories, authentic.categoryIndex).matchingStatus) {
+            const updateResource = Logic.updateResource(req.body, categories, authentic.categoryIndex, authentic.contentIndex);
+            if (updateResource.updateStatus)
+                res.status(200).send(JSON.stringify(updateResource.message));
+            else
+                res.status(200).send(JSON.stringify({message : updateResource.message}));
+        }
+        else res.status(200).send(JSON.stringify({ message: 'Request badly constructed' }));
+    }
+    else
+        res.status(404).send(JSON.stringify({ message: 'Resource not found' }));
+
 });
 
 // Port settings
