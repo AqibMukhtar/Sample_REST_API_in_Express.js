@@ -115,6 +115,23 @@ function idConflict(newId, oldId, contentArray) {
     return false;
 }
 
+function deleteId(categoryIndex, contentIndex, categories) {
+    let x = contentIndex - 1;
+    let arr = categories[categoryIndex].content;
+    const endPoint = arr.length - 1;
+    while (++x < endPoint)
+        arr[x] = arr[x + 1];
+    arr.pop();
+}
+
+function deleteCategory(categories, categoryIndex) {
+    let x = categoryIndex - 1;
+    const endPoint = categories.length - 1;
+    while (++x < endPoint)
+        categories[x] = categories[x + 1];
+    categories.pop();
+}
+
 module.exports = {
     checkCategory,
     checkId,
@@ -122,5 +139,7 @@ module.exports = {
     parseResource,
     appendMember,
     resquestBodyProperlyConstructed,
-    updateResource
+    updateResource,
+    deleteId,
+    deleteCategory
 };

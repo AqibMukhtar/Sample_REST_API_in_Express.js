@@ -104,13 +104,44 @@ app.put('/api/:category/:id', (req, res) => {
             if (updateResource.updateStatus)
                 res.status(200).send(JSON.stringify(updateResource.message));
             else
-                res.status(200).send(JSON.stringify({message : updateResource.message}));
+                res.status(200).send(JSON.stringify({ message: updateResource.message }));
         }
         else res.status(200).send(JSON.stringify({ message: 'Request badly constructed' }));
     }
     else
         res.status(404).send(JSON.stringify({ message: 'Resource not found' }));
 
+});
+
+// DELETE request handlers to delete resources 
+
+app.delete('/api/:category', (req, res) => {
+    const authentic = Logic.checkCategory(req.params.category, categories);
+    res.set({
+        'Cache-Control': 'no-cache'
+    });
+    if (authentic.status) {
+        Logic.deleteCategory(categories, authentic.index);
+        res.status(204).end();
+    }
+    else res.status(404).send(JSON.stringify({ message: `${req.params.category} not found` }));
+
+});
+
+app.delete('/api/:category/:id', (req, res) => {
+    const id = req.params.id, category = req.params.category,
+        authentic = Logic.checkId(id, category, categories);
+    res.set({
+        'Cache-Control': 'no-cache'
+    });
+    if (authentic.status) {
+        Logic.deleteId(authentic.categoryIndex, authentic.contentIndex, categories);
+        res.status(202).send(Logic.parseResource(categories[authentic.categoryIndex].content));
+    }
+    else if (authentic.categoryStatus)
+        res.status(404).send(JSON.stringify({ message: `${id} not found` }));
+    else
+        res.status(404).send(JSON.stringify({ message: `${category} not found` }));
 });
 
 // Port settings
